@@ -4,7 +4,7 @@ package com.martynov.model
 data class PostModel(
     val id: Long,
     val date: Long = 0,
-    val autor: String,
+    val autor: String? = null,
     val postResurse: String? = null,
     var like: Int = 0,
     val comments: Int = 0,
@@ -18,7 +18,8 @@ data class PostModel(
     val url: String? = null,
     val dateRepost: Long? = null,
     val autorRepost: String? = null,
-    var hidePost: Boolean = false
+    var hidePost: Boolean = false,
+    var viewsPost: Long = 0
 
 )
 

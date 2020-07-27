@@ -19,9 +19,12 @@ import org.kodein.di.ktor.kodein
 
 fun Routing.v1(){
     val repo by kodein().instance<PostRepository>()
-    route("/api/v1/posts") {
-        get {
+    route("/") {
+        get("/api/v1/posts") {
             val response = repo.getAll()
+            for (post in response){
+                post.viewsPost = post.viewsPost +1
+            }
             call.respond(response)
         }
         get("/{id}") {
@@ -32,11 +35,9 @@ fun Routing.v1(){
         }
         post ("/api/v1/posts") {
             val request = call.receive<PostRequestDto>()
-            val model = PostModel(id = request.id, autor = request.autor, postResurse = request.postResurse, like = request.like, isLike = request.isLike)
-            call.respondText { "Успешно" }
-
-            /*val response = repo.save(model)
-            call.respond(response)*/
+            val model = PostModel(id = request.id, autor= request.autor, postResurse = request.postResurse, like = request.like, isLike = request.isLike)
+            val response = repo.save(model)
+            call.respond(response)
         }
 
 
