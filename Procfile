@@ -1,1 +1,1 @@
-web: ./build/install/untitled/bin/untitled
+web: ./build/install/martynov/bin/martynov
