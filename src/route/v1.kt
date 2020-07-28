@@ -19,21 +19,21 @@ import org.kodein.di.ktor.kodein
 
 fun Routing.v1(){
     val repo by kodein().instance<PostRepository>()
-    route("/") {
-        get("/api/v1/posts") {
+    route("/api/v1") {
+        get("/posts") {
             val response = repo.getAll()
             for (post in response){
                 post.viewsPost = post.viewsPost +1
             }
             call.respond(response)
         }
-        get("/{id}") {
+        get("/posts/{id}") {
             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
             val model = repo.getById(id) ?: throw NotFoundException()
             val response = PostResponseDto.fromModel(model)
             call.respond(response)
         }
-        post ("/api/v1/posts") {
+        post ("/posts/like") {
             val request = call.receive<PostRequestDto>()
             val model = PostModel(id = request.id, autor= request.autor, postResurse = request.postResurse, like = request.like, isLike = request.isLike)
             val response = repo.save(model)
