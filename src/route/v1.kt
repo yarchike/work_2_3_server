@@ -9,10 +9,8 @@ import io.ktor.features.NotFoundException
 import io.ktor.features.ParameterConversionException
 import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.response.respondText
+import io.ktor.routing.*
 import org.kodein.di.generic.instance
 import org.kodein.di.ktor.kodein
 
@@ -49,8 +47,11 @@ fun Routing.v1() {
             val model = PostModel(id = request.id, dateRepost = request.dateRepost, autorRepost = request.autorRepost)
             val response = repo.repost(model) ?: throw NotFoundException()
             call.respond(response)
-
-
+        }
+        delete("/posts/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
+            repo.removeById(id)
+            call.respondText { "Успешно удалено" }
         }
     }
 }
