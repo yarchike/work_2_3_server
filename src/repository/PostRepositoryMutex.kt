@@ -3,6 +3,7 @@ package com.martynov.repository
 import com.google.gson.Gson
 import com.martynov.PostData
 import com.martynov.model.PostModel
+import com.martynov.model.PostTypes
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -62,9 +63,39 @@ class PostRepositoryMutex : PostRepository {
             newPost
         }
 
-    override suspend fun dislikeById(id: Long): PostModel? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override suspend fun dislikeById(id: Long): PostModel?  =
+        mutex.withLock {
+            val index = items.indexOfFirst { it.id == id }
+            if (index < 0) {
+                return@withLock null
+            }
+
+            val post = items[index]
+
+            val newPost = post.copy(like = post.like.dec(), isLike = false)
+
+            items[index] = newPost
+
+            newPost
+        }
+
+    override suspend fun repost(item: PostModel): PostModel? =
+            mutex.withLock {
+                val index = items.indexOfFirst { it.id == item.id }
+                if (index < 0) {
+                    return@withLock null
+               }
+
+                val post = items[index]
+
+                val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
+
+                items.add(newPost)
+
+                newPost
+            }
+
+
 }
 
 fun main() {

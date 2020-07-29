@@ -34,12 +34,23 @@ fun Routing.v1() {
         }
         post("/posts/like") {
             val request = call.receive<PostRequestDto>()
-            val model = PostModel(id = request.id, autor = request.autor, postResurse = request.postResurse, like = request.like, isLike = request.isLike)
+            val model = PostModel(id = request.id)
             val response = repo.likeById(model.id) ?: throw NotFoundException()
             call.respond(response)
         }
+        post("/posts/dislike") {
+            val request = call.receive<PostRequestDto>()
+            val model = PostModel(id = request.id)
+            val response = repo.dislikeById(model.id) ?: throw NotFoundException()
+            call.respond(response)
+        }
+        post("/posts/repost") {
+            val request = call.receive<PostRequestDto>()
+            val model = PostModel(id = request.id, dateRepost = request.dateRepost, autorRepost = request.autorRepost)
+            val response = repo.repost(model) ?: throw NotFoundException()
+            call.respond(response)
 
 
+        }
     }
-
 }
