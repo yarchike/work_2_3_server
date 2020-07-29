@@ -55,7 +55,7 @@ class PostRepositoryMutex : PostRepository {
 
             val post = items[index]
 
-            val newPost = post.copy(like = post.like.inc())
+            val newPost = post.copy(like = post.like.inc(), isLike = true)
 
             items[index] = newPost
 

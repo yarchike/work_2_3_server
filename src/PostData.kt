@@ -1,14 +1,18 @@
 package com.martynov
 
+import com.google.gson.Gson
 import com.martynov.model.PostModel
 import com.martynov.model.PostTypes
+import sun.rmi.runtime.Log
+import java.io.File
 
 object PostData {
 
     fun getDataBase(): ArrayList<PostModel> {
         val list = ArrayList<PostModel>()
-
-        list.add(
+        val fileName = "posts.json"
+        //val list2 = Gson().fromJson<List<PostModel>>(File(fileName).readText())
+                list.add(
             PostModel(
                 2,
                 1594585699570,
