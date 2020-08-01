@@ -6,7 +6,7 @@ data class PostModel(
     val date: Long = 0,
     val autor: String? = null,
     val postResurse: String? = null,
-    var like: Int = 0,
+    val like: Int = 0,
     val comments: Int = 0,
     val share: Int = 0,
     var isLike: Boolean = false,
@@ -18,8 +18,10 @@ data class PostModel(
     val url: String? = null,
     val dateRepost: Long? = null,
     val autorRepost: String? = null,
-    var hidePost: Boolean = false,
-    var viewsPost: Long = 0
+    val hidePost: Boolean = false,
+    val viewsPost: Long = 0,
+    val autorId: Long = -1,
+    val postIsLike: ArrayList<Long> = ArrayList()
 
 )
 

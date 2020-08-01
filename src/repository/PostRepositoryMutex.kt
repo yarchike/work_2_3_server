@@ -2,8 +2,10 @@ package com.martynov.repository
 
 import com.google.gson.Gson
 import com.martynov.PostData
+import com.martynov.exception.ActionProhibitedException
 import com.martynov.model.PostModel
 import com.martynov.model.PostTypes
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -18,6 +20,12 @@ class PostRepositoryMutex : PostRepository {
 
     override suspend fun getAll(): List<PostModel> =
         mutex.withLock {
+            for(post in items){
+                val index = items.indexOf(post)
+                val copy = post.copy(viewsPost = post.viewsPost + 1)
+                items[index] = copy
+
+            }
             items.reversed()
         }
 
@@ -47,14 +55,16 @@ class PostRepositoryMutex : PostRepository {
         }
     }
 
-    override suspend fun likeById(id: Long): PostModel? =
+    override suspend fun likeById(id: Long, userId:Long): PostModel? =
         mutex.withLock {
             val index = items.indexOfFirst { it.id == id }
             if (index < 0) {
                 return@withLock null
             }
-
             val post = items[index]
+            if(post.postIsLike.contains(userId)){
+                return throw ActionProhibitedException("действие запрешено")
+            }
 
             val newPost = post.copy(like = post.like.inc(), isLike = true)
 
@@ -63,7 +73,7 @@ class PostRepositoryMutex : PostRepository {
             newPost
         }
 
-    override suspend fun dislikeById(id: Long): PostModel?  =
+    override suspend fun dislikeById(id: Long, userId:Long): PostModel? =
         mutex.withLock {
             val index = items.indexOfFirst { it.id == id }
             if (index < 0) {
@@ -71,6 +81,9 @@ class PostRepositoryMutex : PostRepository {
             }
 
             val post = items[index]
+            if(!post.postIsLike.contains(userId)){
+                return throw ActionProhibitedException("действие запрешено")
+            }
 
             val newPost = post.copy(like = post.like.dec(), isLike = false)
 
@@ -80,20 +93,20 @@ class PostRepositoryMutex : PostRepository {
         }
 
     override suspend fun repost(item: PostModel): PostModel? =
-            mutex.withLock {
-                val index = items.indexOfFirst { it.id == item.id }
-                if (index < 0) {
-                    return@withLock null
-               }
-
-                val post = items[index]
-
-                val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
-
-                items.add(newPost)
-
-                newPost
+        mutex.withLock {
+            val index = items.indexOfFirst { it.id == item.id }
+            if (index < 0) {
+                return@withLock null
             }
+
+            val post = items[index]
+
+            val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
+
+            items.add(newPost)
+
+            newPost
+        }
 
 
 }
@@ -115,7 +128,7 @@ fun main() {
         with(CoroutineScope(EmptyCoroutineContext + SupervisorJob())) {
             repeat(100_000) {
                 launch {
-                    repo.likeById(1L)
+                    repo.likeById(1L, 1L)
                 }
             }
         }

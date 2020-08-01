@@ -7,5 +7,6 @@ data class PostRequestDto(
     var like: Int = 0,
     var isLike: Boolean =false,
     val dateRepost: Long? = null,
-    val autorRepost: String? = null
+    val autorRepost: String? = null,
+    val autorId: Long = -1
 )
