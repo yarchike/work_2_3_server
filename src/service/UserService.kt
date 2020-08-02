@@ -6,6 +6,7 @@ import com.martynov.dto.PasswordChangeRequestDto
 import com.martynov.exception.InvalidPasswordException
 import com.martynov.exception.PasswordChangeException
 import com.martynov.exception.UserAddException
+import com.martynov.exception.UserNotFoundException
 import com.martynov.model.UserModel
 import com.martynov.repository.UserRepository
 import io.ktor.features.NotFoundException
@@ -22,7 +23,7 @@ class UserService(
     }
 
     suspend fun changePassword(id: Long, input: PasswordChangeRequestDto) {
-        val model = repo.getById(id) ?: throw NotFoundException()
+        val model = repo.getById(id) ?: throw UserNotFoundException()
         if (!passwordEncoder.matches(input.old_password, model.password)) {
             throw PasswordChangeException("Неверный пароль!")
         }
@@ -44,6 +45,7 @@ class UserService(
 
     suspend fun addUser(username: String, password: String): AuthenticationResponseDto {
         val model = UserModel(
+            id = repo.getSizeListUser().toLong(),
             username = username,
             password = passwordEncoder.encode(password)
         )

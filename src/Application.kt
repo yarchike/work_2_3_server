@@ -21,6 +21,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.server.cio.EngineMain
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
@@ -52,9 +53,12 @@ fun Application.module(testing: Boolean = false) {
         bind<UserRepository>() with eagerSingleton { UserRepositoryInMemoryWithMutexImpl() }
         bind<UserService>() with eagerSingleton {
             UserService(instance(), instance(), instance()).apply {
+                runBlocking {
+                    this@apply.addUser("myv", "haus5891")
+                }
             }
-
         }
+        bind<RoutingV1>() with eagerSingleton { RoutingV1(instance()) }
     }
         install(Authentication) {
             jwt {

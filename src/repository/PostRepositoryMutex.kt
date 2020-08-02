@@ -55,7 +55,7 @@ class PostRepositoryMutex : PostRepository {
         }
     }
 
-    override suspend fun likeById(id: Long, userId:Long): PostModel? =
+    override suspend fun likeById(id: Long, userId:Long?): PostModel? =
         mutex.withLock {
             val index = items.indexOfFirst { it.id == id }
             if (index < 0) {
@@ -73,7 +73,7 @@ class PostRepositoryMutex : PostRepository {
             newPost
         }
 
-    override suspend fun dislikeById(id: Long, userId:Long): PostModel? =
+    override suspend fun dislikeById(id: Long, userId:Long?): PostModel? =
         mutex.withLock {
             val index = items.indexOfFirst { it.id == id }
             if (index < 0) {

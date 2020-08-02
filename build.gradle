@@ -2,7 +2,7 @@ buildscript {
     repositories {
         jcenter()
     }
-    
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -37,7 +37,9 @@ dependencies {
     testImplementation "io.ktor:ktor-server-tests:1.2.4"
     implementation "io.ktor:ktor-auth:1.2.4"
     implementation "io.ktor:ktor-auth-jwt:1.2.4"
+    implementation "commons-logging:commons-logging:1.2"
     implementation "org.springframework.security:spring-security-crypto:5.1.6.RELEASE"
+
 
 }
 

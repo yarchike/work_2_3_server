@@ -49,14 +49,14 @@ class RoutingV1(
                     }
                     post("/posts/like") {
                         val request = call.receive<PostRequestDto>()
-                        val requestUser = call.receive<UserModel>()
-                        val response = repo.likeById(request.id, requestUser.id) ?: throw NotFoundException()
+                        val me = call.authentication.principal<UserModel>()
+                        val response = repo.likeById(request.id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
                     post("/posts/dislike") {
                         val request = call.receive<PostRequestDto>()
-                        val requestUser = call.receive<UserModel>()
-                        val response = repo.dislikeById(request.id, requestUser.id) ?: throw NotFoundException()
+                        val me = call.authentication.principal<UserModel>()
+                        val response = repo.dislikeById(request.id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
                     post("/posts/repost") {
@@ -71,12 +71,12 @@ class RoutingV1(
                         call.respond(response)
                     }
                     delete("/posts/{id}") {
-                        val request = call.receive<UserModel>()
+                        val me = call.authentication.principal<UserModel>()
 
                         val id =
                             call.parameters["id"]?.toLongOrNull()
                                 ?: throw ParameterConversionException("id", "Long")
-                        if(request.id == id){
+                        if(me?.id == id){
                             repo.removeById(id)
                             call.respondText { "Успешно удалено" }
                         }else{
