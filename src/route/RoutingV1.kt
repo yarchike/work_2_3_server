@@ -78,7 +78,7 @@ class RoutingV1(
                                 ?: throw ParameterConversionException("id", "Long")
                         if(me?.id == id){
                             repo.removeById(id)
-                            call.respondText { "Успешно удалено" }
+                            call.respond(HttpStatusCode.OK)
                         }else{
                             call.respond(HttpStatusCode.Forbidden)
                         }
@@ -89,7 +89,7 @@ class RoutingV1(
                 post("/registration") {
                     val input = call.receive<AuthenticationRequestDto>()
                     val response = userService.addUser(input.username, input.password)
-                    call.respondText {"Успешная регистрация"}
+                    call.respond(response)
                 }
                 post("/authentication") {
                     val input = call.receive<AuthenticationRequestDto>()
