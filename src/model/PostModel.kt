@@ -2,7 +2,7 @@ package com.martynov.model
 
 
 data class PostModel(
-    val id: Long,
+    val id: Long = 0,
     val date: Long = 0,
     val autor: String? = null,
     val postResurse: String? = null,
