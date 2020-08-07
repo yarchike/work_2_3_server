@@ -1,3 +1,3 @@
 package com.martynov.dto
 
-data class AuthenticationResponseDto (val toke: String)
+data class AuthenticationResponseDto (val token: String)
