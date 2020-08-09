@@ -1,7 +1,6 @@
 package com.martynov.route
 
 import com.martynov.dto.AuthenticationRequestDto
-import com.martynov.dto.PostRequestDto
 import com.martynov.dto.PostResponseDto
 import com.martynov.dto.UserResponseDto
 import com.martynov.model.PostModel
@@ -16,11 +15,11 @@ import io.ktor.features.ParameterConversionException
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.*
 import org.kodein.di.generic.instance
 import org.kodein.di.ktor.kodein
 
+//
 class RoutingV1(
         private val userService: UserService
 ) {
