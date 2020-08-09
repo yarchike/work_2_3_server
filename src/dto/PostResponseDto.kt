@@ -5,7 +5,7 @@ import com.martynov.model.PostTypes
 
 
 data class PostResponseDto(
-        val id: Long,
+        val id: Long = 0,
         val autor: String?,
         val postResurse: String? = null,
         val date: Long = 0,
