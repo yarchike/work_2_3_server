@@ -47,16 +47,20 @@ class RoutingV1(
                         val response = PostResponseDto.fromModel(model)
                         call.respond(response)
                     }
-                    post("/posts/like") {
-                        val request = call.receive<PostRequestDto>()
+                    post("api/v1/posts/{id}/likes") {
+                        val id =
+                                call.parameters["id"]?.toLongOrNull()
+                                        ?: throw ParameterConversionException("id", "Long")
                         val me = call.authentication.principal<UserModel>()
-                        val response = repo.likeById(request.id, me?.id) ?: throw NotFoundException()
+                        val response = repo.likeById(id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
-                    post("/posts/dislike") {
-                        val request = call.receive<PostRequestDto>()
+                    delete("api/v1/posts/{id}/likes") {
+                        val id =
+                                call.parameters["id"]?.toLongOrNull()
+                                        ?: throw ParameterConversionException("id", "Long")
                         val me = call.authentication.principal<UserModel>()
-                        val response = repo.dislikeById(request.id, me?.id) ?: throw NotFoundException()
+                        val response = repo.dislikeById(id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
                     post("/posts/repost") {
