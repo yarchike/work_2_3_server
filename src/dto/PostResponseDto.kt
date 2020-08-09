@@ -22,7 +22,8 @@ data class PostResponseDto(
         val dateRepost: Long? = null,
         val autorRepost: String? = null,
         var hidePost: Boolean = false,
-        var viewsPost: Long = 0
+        var viewsPost: Long = 0,
+        val repostResurs:PostModel?=null
 
 ) {
     companion object {
@@ -44,7 +45,8 @@ data class PostResponseDto(
                 dateRepost = model.dateRepost,
                 autorRepost = model.autorRepost,
                 hidePost = model.hidePost,
-                viewsPost = model.viewsPost
+                viewsPost = model.viewsPost,
+                repostResurs = model.repostResurs
 
 
         )

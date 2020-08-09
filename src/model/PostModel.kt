@@ -21,7 +21,8 @@ data class PostModel(
     val hidePost: Boolean = false,
     val viewsPost: Long = 0,
     val autorId: Long = -1,
-    val postIsLike: ArrayList<Long> = ArrayList()
+    val postIsLike: ArrayList<Long> = ArrayList(),
+    val repostResurs:PostModel?=null
 
 )
 

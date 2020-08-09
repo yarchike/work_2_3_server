@@ -22,7 +22,7 @@ import org.kodein.di.generic.instance
 import org.kodein.di.ktor.kodein
 
 class RoutingV1(
-    private val userService: UserService
+        private val userService: UserService
 ) {
     fun setup(configuration: Routing) {
         with(configuration) {
@@ -41,13 +41,13 @@ class RoutingV1(
                     }
                     get("/posts/{id}") {
                         val id =
-                            call.parameters["id"]?.toLongOrNull()
-                                ?: throw ParameterConversionException("id", "Long")
+                                call.parameters["id"]?.toLongOrNull()
+                                        ?: throw ParameterConversionException("id", "Long")
                         val model = repo.getById(id) ?: throw NotFoundException()
                         val response = PostResponseDto.fromModel(model)
                         call.respond(response)
                     }
-                    post("api/v1/posts/{id}/likes") {
+                    post("/posts/{id}/likes") {
                         val id =
                                 call.parameters["id"]?.toLongOrNull()
                                         ?: throw ParameterConversionException("id", "Long")
@@ -55,7 +55,7 @@ class RoutingV1(
                         val response = repo.likeById(id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
-                    delete("api/v1/posts/{id}/likes") {
+                    delete("/posts/{id}/likes") {
                         val id =
                                 call.parameters["id"]?.toLongOrNull()
                                         ?: throw ParameterConversionException("id", "Long")
@@ -63,14 +63,23 @@ class RoutingV1(
                         val response = repo.dislikeById(id, me?.id) ?: throw NotFoundException()
                         call.respond(response)
                     }
-                    post("/posts/repost") {
-                        val request = call.receive<PostRequestDto>()
+                    post("/repost") {
+                        val request = call.receive<PostResponseDto>()
                         val model =
-                            PostModel(
-                                id = request.id,
-                                dateRepost = request.dateRepost,
-                                autorRepost = request.autorRepost
-                            )
+                                PostModel(
+                                        postResurse = request.postResurse,
+                                        repostResurs = request.repostResurs
+
+                                )
+                        val response = repo.repost(model) ?: throw NotFoundException()
+                        call.respond(response)
+                    }
+                    post("/posts") {
+                        val request = call.receive<PostResponseDto>()
+                        val model =
+                                PostModel(
+                                        postResurse = request.postResurse
+                                )
                         val response = repo.repost(model) ?: throw NotFoundException()
                         call.respond(response)
                     }
@@ -78,12 +87,12 @@ class RoutingV1(
                         val me = call.authentication.principal<UserModel>()
 
                         val id =
-                            call.parameters["id"]?.toLongOrNull()
-                                ?: throw ParameterConversionException("id", "Long")
-                        if(me?.id == id){
+                                call.parameters["id"]?.toLongOrNull()
+                                        ?: throw ParameterConversionException("id", "Long")
+                        if (me?.id == id) {
                             repo.removeById(id)
                             call.respond(HttpStatusCode.OK)
-                        }else{
+                        } else {
                             call.respond(HttpStatusCode.Forbidden)
                         }
 
