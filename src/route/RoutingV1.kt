@@ -97,9 +97,15 @@ class RoutingV1(
 
 
                     }
-                    post("posts/recent"){
+                    get("posts/recent"){
                         val response = repo.getfive()
                         call.respond(response)
+                    }
+                    post("posts/old"){
+                        val id = call.receive<Long>()
+                        val response = repo.getOld(id)
+                        call.respond(response)
+
                     }
                 }
                 post("/registration") {

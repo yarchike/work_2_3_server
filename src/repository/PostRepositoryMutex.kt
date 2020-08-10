@@ -5,8 +5,10 @@ import com.martynov.PostData
 import com.martynov.exception.ActionProhibitedException
 import com.martynov.model.PostModel
 import com.martynov.model.PostTypes
-import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
@@ -19,35 +21,35 @@ class PostRepositoryMutex : PostRepository {
     private val mutex = Mutex()
 
     override suspend fun getAll(): List<PostModel> =
-        mutex.withLock {
-            for(post in items){
-                val index = items.indexOf(post)
-                val copy = post.copy(viewsPost = post.viewsPost + 1)
-                items[index] = copy
+            mutex.withLock {
+                for (post in items) {
+                    val index = items.indexOf(post)
+                    val copy = post.copy(viewsPost = post.viewsPost + 1)
+                    items[index] = copy
 
+                }
+                items.reversed()
             }
-            items.reversed()
-        }
 
     override suspend fun getById(id: Long): PostModel? =
-        mutex.withLock {
-            items.find { it.id == id }
-        }
+            mutex.withLock {
+                items.find { it.id == id }
+            }
 
     override suspend fun save(item: PostModel): PostModel =
-        mutex.withLock {
-            when (val index = items.indexOfFirst { it.id == item.id }) {
-                -1 -> {
-                    val copy = item.copy(id = nextId++)
-                    items.add(copy)
-                    copy
-                }
-                else -> {
-                    items[index] = item
-                    item
+            mutex.withLock {
+                when (val index = items.indexOfFirst { it.id == item.id }) {
+                    -1 -> {
+                        val copy = item.copy(id = nextId++)
+                        items.add(copy)
+                        copy
+                    }
+                    else -> {
+                        items[index] = item
+                        item
+                    }
                 }
             }
-        }
 
     override suspend fun removeById(id: Long) {
         mutex.withLock {
@@ -55,75 +57,113 @@ class PostRepositoryMutex : PostRepository {
         }
     }
 
-    override suspend fun likeById(id: Long, userId:Long?): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
-            val post = items[index]
-            if(post.postIsLike.contains(userId)){
-                return throw ActionProhibitedException("действие запрешено")
-            }
-
-            val newPost = post.copy(like = post.like.inc(), isLike = true)
-
-            items[index] = newPost
-
-            newPost
-        }
-
-    override suspend fun dislikeById(id: Long, userId:Long?): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
-
-            val post = items[index]
-            if(!post.postIsLike.contains(userId)){
-                return throw ActionProhibitedException("действие запрешено")
-            }
-
-            val newPost = post.copy(like = post.like.dec(), isLike = false)
-
-            items[index] = newPost
-
-            newPost
-        }
-
-    override suspend fun repost(item: PostModel): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == item.id }
-            if (index < 0) {
-                return@withLock null
-            }
-
-            val post = items[index]
-
-            val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
-
-            items.add(newPost)
-
-            newPost
-        }
-
-    override suspend fun getfive(): List<PostModel> =
-        mutex.withLock {
-            var i = 1
-            for(post in items){
-                val index = items.indexOf(post)
-                val copy = post.copy(viewsPost = post.viewsPost + 1)
-                items[index] = copy
-                i ++
-                if(i > 5){
-                    break;
+    override suspend fun likeById(id: Long, userId: Long?): PostModel? =
+            mutex.withLock {
+                val index = items.indexOfFirst { it.id == id }
+                if (index < 0) {
+                    return@withLock null
+                }
+                val post = items[index]
+                if (post.postIsLike.contains(userId)) {
+                    return throw ActionProhibitedException("действие запрешено")
                 }
 
-            }
-            items.reversed()
-        }
+                val newPost = post.copy(like = post.like.inc(), isLike = true)
 
+                items[index] = newPost
+
+                newPost
+            }
+
+    override suspend fun dislikeById(id: Long, userId: Long?): PostModel? =
+            mutex.withLock {
+                val index = items.indexOfFirst { it.id == id }
+                if (index < 0) {
+                    return@withLock null
+                }
+
+                val post = items[index]
+                if (!post.postIsLike.contains(userId)) {
+                    return throw ActionProhibitedException("действие запрешено")
+                }
+
+                val newPost = post.copy(like = post.like.dec(), isLike = false)
+
+                items[index] = newPost
+
+                newPost
+            }
+
+    override suspend fun repost(item: PostModel): PostModel? =
+            mutex.withLock {
+                val index = items.indexOfFirst { it.id == item.id }
+                if (index < 0) {
+                    return@withLock null
+                }
+
+                val post = items[index]
+
+                val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
+
+                items.add(newPost)
+
+                newPost
+            }
+
+    override suspend fun getfive(): List<PostModel> =
+            mutex.withLock {
+                var list = ArrayList<PostModel>()
+                var tempSizeBig =0
+                var tempSizelesser =0
+                if(items.size  < 5 ){
+                    tempSizeBig = items.size
+                }else{
+                    tempSizeBig = items.size - 5
+                }
+                if(items.size < 1){
+                    tempSizelesser = items.size
+                }else{
+                    tempSizelesser = items.size -1
+                }
+                for (i in tempSizelesser downTo tempSizeBig) {
+                    val post = items[i]
+                    val copy = post.copy(viewsPost = post.viewsPost + 1)
+                    list.add(copy)
+
+                }
+                list
+            }
+
+    override suspend fun getOld(id: Long): List<PostModel> =
+            mutex.withLock {
+                var itemTemp = ArrayList<PostModel>()
+                var list = ArrayList<PostModel>()
+                var tempSizeBig =0
+                var tempSizelesser =0
+                for (post in items) {
+                    if(post.id < id){
+                        itemTemp.add(post)
+                    }
+                }
+                if(itemTemp.size  < 5 ){
+                    tempSizeBig = itemTemp.size
+                }else{
+                    tempSizeBig = itemTemp.size - 5
+                }
+                if(itemTemp.size < 1){
+                    tempSizelesser = itemTemp.size
+                }else{
+                    tempSizelesser = itemTemp.size -1
+                }
+
+                for (i in tempSizelesser  downTo tempSizeBig) {
+                    val post = itemTemp[i]
+                    val copy = post.copy(viewsPost = post.viewsPost + 1)
+                    list.add(copy)
+
+                }
+                list
+            }
 
 
 }
