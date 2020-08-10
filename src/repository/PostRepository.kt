@@ -10,5 +10,6 @@ interface PostRepository {
     suspend fun likeById(id: Long, userId:Long?): PostModel?
     suspend fun dislikeById(id: Long, userId:Long?): PostModel?
     suspend fun repost(item: PostModel): PostModel?
+    suspend fun getfive():List<PostModel>
 
 }

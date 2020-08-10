@@ -108,6 +108,23 @@ class PostRepositoryMutex : PostRepository {
             newPost
         }
 
+    override suspend fun getfive(): List<PostModel> =
+        mutex.withLock {
+            var i = 1
+            for(post in items){
+                val index = items.indexOf(post)
+                val copy = post.copy(viewsPost = post.viewsPost + 1)
+                items[index] = copy
+                i ++
+                if(i > 5){
+                    break;
+                }
+
+            }
+            items.reversed()
+        }
+
+
 
 }
 

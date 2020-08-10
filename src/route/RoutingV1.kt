@@ -97,6 +97,10 @@ class RoutingV1(
 
 
                     }
+                    post("posts/recent"){
+                        val response = repo.getfive()
+                        call.respond(response)
+                    }
                 }
                 post("/registration") {
                     val input = call.receive<AuthenticationRequestDto>()
