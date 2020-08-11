@@ -6,6 +6,8 @@ import com.martynov.dto.UserResponseDto
 import com.martynov.model.PostModel
 import com.martynov.model.UserModel
 import com.martynov.repository.PostRepository
+import com.martynov.service.FileService
+import com.martynov.service.PostService
 import com.martynov.service.UserService
 import io.ktor.application.call
 import io.ktor.auth.authenticate
@@ -13,7 +15,10 @@ import io.ktor.auth.authentication
 import io.ktor.features.NotFoundException
 import io.ktor.features.ParameterConversionException
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.files
+import io.ktor.http.content.static
 import io.ktor.request.receive
+import io.ktor.request.receiveMultipart
 import io.ktor.response.respond
 import io.ktor.routing.*
 import org.kodein.di.generic.instance
@@ -21,12 +26,28 @@ import org.kodein.di.ktor.kodein
 
 //
 class RoutingV1(
+        private val staticPath: String,
+        //private val postService: PostService,
+        private val fileService: FileService,
         private val userService: UserService
+
 ) {
     fun setup(configuration: Routing) {
         with(configuration) {
             val repo by kodein().instance<PostRepository>()
             route("/api/v1") {
+                static("/static") {
+                    files(staticPath)
+                }
+                route("/media") {
+                    post {
+                        val multipart = call.receiveMultipart()
+                        val response = fileService.save(multipart)
+                        call.respond(response)
+
+                    }
+                }
+
                 authenticate {
                     route("/me") {
                         get {
@@ -97,11 +118,11 @@ class RoutingV1(
 
 
                     }
-                    get("posts/recent"){
+                    get("posts/recent") {
                         val response = repo.getfive()
                         call.respond(response)
                     }
-                    post("posts/old"){
+                    post("posts/old") {
                         val id = call.receive<Long>()
                         val response = repo.getOld(id)
                         call.respond(response)
@@ -122,3 +143,4 @@ class RoutingV1(
         }
     }
 }
+
