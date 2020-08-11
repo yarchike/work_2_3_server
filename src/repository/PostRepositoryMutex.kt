@@ -97,6 +97,7 @@ class PostRepositoryMutex : PostRepository {
     override suspend fun repost(item: PostModel): PostModel? =
             mutex.withLock {
                 val index = items.indexOfFirst { it.id == item.id }
+                println(index)
                 if (index < 0) {
                     return@withLock null
                 }
@@ -113,17 +114,17 @@ class PostRepositoryMutex : PostRepository {
     override suspend fun getfive(): List<PostModel> =
             mutex.withLock {
                 var list = ArrayList<PostModel>()
-                var tempSizeBig =0
-                var tempSizelesser =0
-                if(items.size  < 5 ){
+                var tempSizeBig = 0
+                var tempSizelesser = 0
+                if (items.size < 5) {
                     tempSizeBig = items.size
-                }else{
+                } else {
                     tempSizeBig = items.size - 5
                 }
-                if(items.size < 1){
+                if (items.size < 1) {
                     tempSizelesser = items.size
-                }else{
-                    tempSizelesser = items.size -1
+                } else {
+                    tempSizelesser = items.size - 1
                 }
                 for (i in tempSizelesser downTo tempSizeBig) {
                     val post = items[i]
@@ -138,31 +139,42 @@ class PostRepositoryMutex : PostRepository {
             mutex.withLock {
                 var itemTemp = ArrayList<PostModel>()
                 var list = ArrayList<PostModel>()
-                var tempSizeBig =0
-                var tempSizelesser =0
+                var tempSizeBig = 0
+                var tempSizelesser = 0
                 for (post in items) {
-                    if(post.id < id){
+                    if (post.id < id) {
                         itemTemp.add(post)
                     }
                 }
-                if(itemTemp.size  < 5 ){
+                if (itemTemp.size < 5) {
                     tempSizeBig = itemTemp.size
-                }else{
+                } else {
                     tempSizeBig = itemTemp.size - 5
                 }
-                if(itemTemp.size < 1){
+                if (itemTemp.size < 1) {
                     tempSizelesser = itemTemp.size
-                }else{
-                    tempSizelesser = itemTemp.size -1
+                } else {
+                    tempSizelesser = itemTemp.size - 1
                 }
 
-                for (i in tempSizelesser  downTo tempSizeBig) {
+                for (i in tempSizelesser downTo tempSizeBig) {
                     val post = itemTemp[i]
                     val copy = post.copy(viewsPost = post.viewsPost + 1)
                     list.add(copy)
 
                 }
                 list
+            }
+
+    override suspend fun newPost(postResurse: String): List<PostModel> =
+            mutex.withLock {
+
+
+                val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse)
+
+                items.add(newPost)
+
+                items
             }
 
 

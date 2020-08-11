@@ -12,5 +12,6 @@ interface PostRepository {
     suspend fun repost(item: PostModel): PostModel?
     suspend fun getfive():List<PostModel>
     suspend fun getOld(id: Long): List<PostModel>
+    suspend fun newPost(postResurse: String): List<PostModel>
 
 }

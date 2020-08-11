@@ -73,13 +73,13 @@ class RoutingV1(
                         val response = repo.repost(model) ?: throw NotFoundException()
                         call.respond(response)
                     }
-                    post("/posts") {
+                    post("/posts/new") {
                         val request = call.receive<PostResponseDto>()
-                        val model =
-                                PostModel(
-                                        postResurse = request.postResurse
-                                )
-                        val response = repo.repost(model) ?: throw NotFoundException()
+                        println(request.toString())
+                        val model = request.postResurse
+
+                        println(model.toString())
+                        val response = repo.newPost(model.toString()) ?: throw NotFoundException()
                         call.respond(response)
                     }
                     delete("/posts/{id}") {
