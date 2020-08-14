@@ -38,8 +38,9 @@ class RoutingV1(
 
 
 
-                authenticate {
+
                     route("/api/v1") {
+                        authenticate {
                         static("/static") {
                             files(staticPath)
                         }
