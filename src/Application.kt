@@ -6,6 +6,7 @@ import com.martynov.repository.PostRepositoryMutex
 import com.martynov.repository.UserRepository
 import com.martynov.repository.UserRepositoryInMemoryWithMutexImpl
 import com.martynov.route.RoutingV1
+import com.martynov.service.FileService
 import com.martynov.service.JWTTokenService
 import com.martynov.service.UserService
 import io.ktor.application.Application
@@ -46,7 +47,9 @@ fun Application.module(testing: Boolean = false) {
     }
     install(KodeinFeature) {
         constant(tag = "upload-dir") with (environment.config.propertyOrNull("ncraft.upload.dir")?.getString()
-                ?: throw ConfigurationException("Upload dir is not specified"))
+                ?: throw ConfigurationException("Upload dir is not specified")
+                )
+        bind<FileService>() with eagerSingleton { FileService(instance(tag = "upload-dir")) }
         bind<PostRepository>() with singleton { PostRepositoryMutex() }
         bind<PasswordEncoder>() with eagerSingleton { BCryptPasswordEncoder() }
         bind<JWTTokenService>() with eagerSingleton { JWTTokenService() }

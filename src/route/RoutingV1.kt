@@ -35,20 +35,23 @@ class RoutingV1(
     fun setup(configuration: Routing) {
         with(configuration) {
             val repo by kodein().instance<PostRepository>()
-            route("/api/v1") {
-                static("/static") {
-                    files(staticPath)
-                }
-                route("/media") {
-                    post {
-                        val multipart = call.receiveMultipart()
-                        val response = fileService.save(multipart)
-                        call.respond(response)
 
-                    }
-                }
+
 
                 authenticate {
+                    route("/api/v1") {
+                        static("/static") {
+                            files(staticPath)
+                        }
+
+                    route("/media") {
+                        post {
+                            val multipart = call.receiveMultipart()
+                            val response = fileService.save(multipart)
+                            call.respond(response)
+
+                        }
+                    }
                     route("/me") {
                         get {
                             val me = call.authentication.principal<UserModel>()

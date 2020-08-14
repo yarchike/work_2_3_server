@@ -113,57 +113,14 @@ class PostRepositoryMutex : PostRepository {
 
     override suspend fun getfive(): List<PostModel> =
             mutex.withLock {
-                var list = ArrayList<PostModel>()
-                var tempSizeBig = 0
-                var tempSizelesser = 0
-                if (items.size < 5) {
-                    tempSizeBig = items.size
-                } else {
-                    tempSizeBig = items.size - 5
-                }
-                if (items.size < 1) {
-                    tempSizelesser = items.size
-                } else {
-                    tempSizelesser = items.size - 1
-                }
-                for (i in tempSizelesser downTo tempSizeBig) {
-                    val post = items[i]
-                    val copy = post.copy(viewsPost = post.viewsPost + 1)
-                    list.add(copy)
-
-                }
-                list
+                items.takeLast(5).reversed()
             }
 
     override suspend fun getOld(id: Long): List<PostModel> =
             mutex.withLock {
-                var itemTemp = ArrayList<PostModel>()
-                var list = ArrayList<PostModel>()
-                var tempSizeBig = 0
-                var tempSizelesser = 0
-                for (post in items) {
-                    if (post.id < id) {
-                        itemTemp.add(post)
-                    }
-                }
-                if (itemTemp.size < 5) {
-                    tempSizeBig = itemTemp.size
-                } else {
-                    tempSizeBig = itemTemp.size - 5
-                }
-                if (itemTemp.size < 1) {
-                    tempSizelesser = itemTemp.size
-                } else {
-                    tempSizelesser = itemTemp.size - 1
-                }
-
-                for (i in tempSizelesser downTo tempSizeBig) {
-                    val post = itemTemp[i]
-                    val copy = post.copy(viewsPost = post.viewsPost + 1)
-                    list.add(copy)
-
-                }
-                list
+                items.filter {
+                    it.id < id
+                }.reversed()
             }
 
     override suspend fun newPost(postResurse: String): List<PostModel> =
