@@ -1,5 +1,6 @@
 package com.martynov.dto
 
+import com.martynov.model.AttachmentModel
 import com.martynov.model.PostModel
 import com.martynov.model.PostTypes
 
@@ -23,7 +24,8 @@ data class PostResponseDto(
         val autorRepost: String? = null,
         var hidePost: Boolean = false,
         var viewsPost: Long = 0,
-        val repostResurs:PostModel?=null
+        val repostResurs:PostModel?=null,
+        val attachment: AttachmentModel? = null
 
 ) {
     companion object {
@@ -46,7 +48,8 @@ data class PostResponseDto(
                 autorRepost = model.autorRepost,
                 hidePost = model.hidePost,
                 viewsPost = model.viewsPost,
-                repostResurs = model.repostResurs
+                repostResurs = model.repostResurs,
+                attachment = model.attachment
 
 
         )

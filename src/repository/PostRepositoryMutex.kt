@@ -3,6 +3,7 @@ package com.martynov.repository
 import com.google.gson.Gson
 import com.martynov.PostData
 import com.martynov.exception.ActionProhibitedException
+import com.martynov.model.AttachmentModel
 import com.martynov.model.PostModel
 import com.martynov.model.PostTypes
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,7 @@ class PostRepositoryMutex : PostRepository {
                     items[index] = copy
 
                 }
+
                 items.reversed()
             }
 
@@ -123,14 +125,13 @@ class PostRepositoryMutex : PostRepository {
                 }.reversed()
             }
 
-    override suspend fun newPost(postResurse: String): List<PostModel> =
+    override suspend fun newPost(postResurse: String, attachment: AttachmentModel?): List<PostModel> =
             mutex.withLock {
 
 
-                val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse)
+                val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse, attachment = attachment)
 
                 items.add(newPost)
-
                 items
             }
 

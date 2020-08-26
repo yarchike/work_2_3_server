@@ -1,6 +1,13 @@
 package com.martynov.model
 
 
+
+enum class AttachmentType {
+    IMAGE
+}
+data class AttachmentModel(val id: String, val mediaType: AttachmentType = AttachmentType.IMAGE)
+
+
 data class PostModel(
     val id: Long = 0,
     val date: Long = 0,
@@ -22,7 +29,8 @@ data class PostModel(
     val viewsPost: Long = 0,
     val autorId: Long = -1,
     val postIsLike: ArrayList<Long> = ArrayList(),
-    val repostResurs:PostModel?=null
+    val repostResurs:PostModel?=null,
+    val attachment: AttachmentModel?= null
 
 )
 

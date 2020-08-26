@@ -1,5 +1,6 @@
 package com.martynov.repository
 
+import com.martynov.model.AttachmentModel
 import com.martynov.model.PostModel
 
 interface PostRepository {
@@ -12,6 +13,6 @@ interface PostRepository {
     suspend fun repost(item: PostModel): PostModel?
     suspend fun getfive():List<PostModel>
     suspend fun getOld(id: Long): List<PostModel>
-    suspend fun newPost(postResurse: String): List<PostModel>
+    suspend fun newPost(postResurse: String, attachment: AttachmentModel?): List<PostModel>
 
 }

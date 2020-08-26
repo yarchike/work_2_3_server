@@ -40,10 +40,11 @@ class RoutingV1(
 
 
                     route("/api/v1") {
-                        authenticate {
                         static("/static") {
                             files(staticPath)
                         }
+                        authenticate {
+
 
                     route("/media") {
                         post {
@@ -100,11 +101,8 @@ class RoutingV1(
                     }
                     post("/posts/new") {
                         val request = call.receive<PostResponseDto>()
-                        println(request.toString())
-                        val model = request.postResurse
-
-                        println(model.toString())
-                        val response = repo.newPost(model.toString()) ?: throw NotFoundException()
+                        print(request.toString())
+                        val response = repo.newPost(request.postResurse.toString(), request.attachment) ?: throw NotFoundException()
                         call.respond(response)
                     }
                     delete("/posts/{id}") {
