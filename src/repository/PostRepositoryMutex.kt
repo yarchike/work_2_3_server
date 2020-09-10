@@ -127,8 +127,6 @@ class PostRepositoryMutex : PostRepository {
 
     override suspend fun newPost(postResurse: String, attachment: AttachmentModel?): List<PostModel> =
             mutex.withLock {
-
-
                 val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse, attachment = attachment)
 
                 items.add(newPost)

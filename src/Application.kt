@@ -6,6 +6,7 @@ import com.martynov.repository.PostRepositoryMutex
 import com.martynov.repository.UserRepository
 import com.martynov.repository.UserRepositoryInMemoryWithMutexImpl
 import com.martynov.route.RoutingV1
+import com.martynov.service.FCMService
 import com.martynov.service.FileService
 import com.martynov.service.JWTTokenService
 import com.martynov.service.UserService
@@ -49,6 +50,19 @@ fun Application.module(testing: Boolean = false) {
         constant(tag = "upload-dir") with (environment.config.propertyOrNull("ncraft.upload.dir")?.getString()
                 ?: throw ConfigurationException("Upload dir is not specified")
                 )
+
+        constant(tag = "result-size") with (environment.config.propertyOrNull("ncraft.api.result-size")?.getString()?.toInt()
+                ?: throw ConfigurationException("API result size is not specified"))
+        constant(tag = "jwt-secret") with (environment.config.propertyOrNull("ncraft.jwt.secret")?.getString()
+                ?: throw ConfigurationException("JWT Secret is not specified"))
+        constant(tag = "fcm-password") with (environment.config.propertyOrNull("ncraft.fcm.password")?.getString()
+                ?: throw ConfigurationException("FCM Password is not specified"))
+        constant(tag = "fcm-salt") with (environment.config.propertyOrNull("ncraft.fcm.salt")?.getString()
+                ?: throw ConfigurationException("FCM Salt is not specified"))
+        constant(tag = "fcm-db-url") with (environment.config.propertyOrNull("ncraft.fcm.db-url")?.getString()
+                ?: throw ConfigurationException("FCM DB Url is not specified"))
+        constant(tag = "fcm-path") with (environment.config.propertyOrNull("ncraft.fcm.path")?.getString()
+                ?: throw ConfigurationException("FCM JSON Path is not specified"))
         bind<FileService>() with eagerSingleton { FileService(instance(tag = "upload-dir")) }
         bind<PostRepository>() with singleton { PostRepositoryMutex() }
         bind<PasswordEncoder>() with eagerSingleton { BCryptPasswordEncoder() }
@@ -62,6 +76,19 @@ fun Application.module(testing: Boolean = false) {
             }
         }
         bind<RoutingV1>() with eagerSingleton { RoutingV1(instance(tag = "upload-dir"), instance(), instance()) }
+        bind<FCMService>() with eagerSingleton {
+            FCMService(
+                    instance(tag = "fcm-db-url"),
+                    instance(tag = "fcm-password"),
+                    instance(tag = "fcm-salt"),
+                    instance(tag = "fcm-path")
+            ).also {
+                runBlocking {
+                    // FIXME: PUT TOKEN FROM DEVICE HERE FOR DEMO PURPOSES
+                    it.send(1, "feQxZiaeS5ScUpnjKhXAU2:APA91bH6e-xrjKpREUNhcdqsVFazzuA_ZZJB8ZCnODKDS9skfKD-Ox9roaa46Ohtf8KPU16Q4_FhqTKmxlIYF0u5S_qY-UtuA-DNSrGNwWhmZzaAyX7NEfoHRb_DwT6JIp_upmvnyaJS", "Your post liked!")
+                }
+            }
+        }
     }
     install(Authentication) {
         jwt {

@@ -39,11 +39,11 @@ class RoutingV1(
 
 
 
-                    route("/api/v1") {
-                        static("/static") {
-                            files(staticPath)
-                        }
-                        authenticate {
+            route("/api/v1") {
+                static("/static") {
+                    files(staticPath)
+                }
+                authenticate {
 
 
                     route("/media") {
@@ -102,7 +102,8 @@ class RoutingV1(
                     post("/posts/new") {
                         val request = call.receive<PostResponseDto>()
                         print(request.toString())
-                        val response = repo.newPost(request.postResurse.toString(), request.attachment) ?: throw NotFoundException()
+                        val response = repo.newPost(request.postResurse.toString(), request.attachment)
+                                ?: throw NotFoundException()
                         call.respond(response)
                     }
                     delete("/posts/{id}") {
@@ -130,6 +131,13 @@ class RoutingV1(
                         call.respond(response)
 
                     }
+                    post("/push") {
+                        val input = call.receive<String>()
+                        println(input)
+                        call.respond("Токен получен")
+
+                    }
+
                 }
                 post("/registration") {
                     val input = call.receive<AuthenticationRequestDto>()
