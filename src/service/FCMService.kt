@@ -34,7 +34,6 @@ class FCMService(
                 val message = Message.builder()
                         .putData("recipientId", recipientId.toString())
                         .putData("title", title)
-                        .putData("body", "Melary")
                         .setToken(recipientToken)
                         .build()
                 FirebaseMessaging.getInstance().send(message)

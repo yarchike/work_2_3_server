@@ -1,11 +1,14 @@
 package com.martynov.repository
 
+import com.google.gson.Gson
+import com.martynov.UserData
 import com.martynov.model.UserModel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.File
 
 class UserRepositoryInMemoryWithMutexImpl : UserRepository {
-    private val items = mutableListOf<UserModel>()
+    private val items = UserData.getDataBase()
     private val mutex = Mutex()
 
 
@@ -64,6 +67,8 @@ class UserRepositoryInMemoryWithMutexImpl : UserRepository {
                         -1 -> {
                             val copy = item.copy(id = items.size.toLong())
                             items.add(copy)
+                            val fileName = "user.json"
+                            File(fileName).writeText(Gson().toJson(items))
                             true
                 }
                 else -> {
@@ -72,6 +77,23 @@ class UserRepositoryInMemoryWithMutexImpl : UserRepository {
             }
         }
 
+    }
+
+    override suspend fun addTokenDevice(tokenUser: String, tokenDevice: String): String {
+        mutex.withLock {
+            val index = items.indexOfFirst { it.token == tokenUser }
+            val copyUser = items[index].copy(tokenDevice = tokenDevice)
+            items[index] = copyUser
+            val fileName = "user.json"
+            File(fileName).writeText(Gson().toJson(items))
+            return copyUser.username
+        }
+    }
+
+    override fun findTokenDevice(username: String): String {
+        val index = items.indexOfFirst { it.username == username }
+        //print(index)
+        return items[index].tokenDevice
     }
 
 }

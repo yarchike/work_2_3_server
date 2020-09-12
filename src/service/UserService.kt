@@ -3,6 +3,7 @@ package com.martynov.service
 import com.martynov.dto.AuthenticationRequestDto
 import com.martynov.dto.AuthenticationResponseDto
 import com.martynov.dto.PasswordChangeRequestDto
+import com.martynov.dto.UserResponeDto
 import com.martynov.exception.InvalidPasswordException
 import com.martynov.exception.PasswordChangeException
 import com.martynov.exception.UserAddException
@@ -14,9 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
 
 
 class UserService(
-    private val repo: UserRepository,
-    private val tokenService: JWTTokenService,
-    private val passwordEncoder: PasswordEncoder
+        private val repo: UserRepository,
+        private val tokenService: JWTTokenService,
+        private val passwordEncoder: PasswordEncoder
 ) {
     suspend fun getModelById(id: Long): UserModel? {
         return repo.getById(id)
@@ -45,16 +46,25 @@ class UserService(
 
     suspend fun addUser(username: String, password: String): AuthenticationResponseDto {
         val model = UserModel(
-            id = repo.getSizeListUser().toLong(),
-            username = username,
-            password = passwordEncoder.encode(password)
+                id = repo.getSizeListUser().toLong(),
+                username = username,
+                password = passwordEncoder.encode(password),
+                token = tokenService.generate(repo.getSizeListUser().toLong())
         )
+
         val checkingIsUser = repo.addUser(model)
-        if(checkingIsUser) {
-            val token = tokenService.generate(model.id)
-            return AuthenticationResponseDto(token)
+        if (checkingIsUser) {
+            return AuthenticationResponseDto(model.token)
         }
-            return throw UserAddException("\"error\": Пользователь с таким логином уже зарегистрирован")
+        return throw UserAddException("\"error\": Пользователь с таким логином уже зарегистрирован")
+    }
+    suspend fun addTokenDevice(tokenUser: String, tokenDevice: String): UserResponeDto {
+        return UserResponeDto(repo.addTokenDevice(tokenUser, tokenDevice))
+    }
+    fun findTokenDevice(input: AuthenticationRequestDto):String{
+        val tokenDevice = repo.findTokenDevice(input.username)
+        //print(tokenDevice)
+        return tokenDevice
     }
 
 

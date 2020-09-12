@@ -1,11 +1,10 @@
 package com.martynov.route
 
-import com.martynov.dto.AuthenticationRequestDto
-import com.martynov.dto.PostResponseDto
-import com.martynov.dto.UserResponseDto
+import com.martynov.dto.*
 import com.martynov.model.PostModel
 import com.martynov.model.UserModel
 import com.martynov.repository.PostRepository
+import com.martynov.service.FCMService
 import com.martynov.service.FileService
 import com.martynov.service.PostService
 import com.martynov.service.UserService
@@ -17,8 +16,7 @@ import io.ktor.features.ParameterConversionException
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.files
 import io.ktor.http.content.static
-import io.ktor.request.receive
-import io.ktor.request.receiveMultipart
+import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.routing.*
 import org.kodein.di.generic.instance
@@ -29,7 +27,8 @@ class RoutingV1(
         private val staticPath: String,
         //private val postService: PostService,
         private val fileService: FileService,
-        private val userService: UserService
+        private val userService: UserService,
+        private  val fcmService: FCMService
 
 ) {
     fun setup(configuration: Routing) {
@@ -132,9 +131,13 @@ class RoutingV1(
 
                     }
                     post("/push") {
-                        val input = call.receive<String>()
-                        println(input)
-                        call.respond("Токен получен")
+                        val input = call.receive<TokenDeviceDto>()
+                        //println(input.token)
+                        val input2 = call.request.header("Authorization").toString().replace("Bearer ", "")
+                        //println(input2)
+                        val user = userService.addTokenDevice(input2, input.token)
+                        //println(user)
+                        call.respond(user)
 
                     }
 
@@ -147,6 +150,8 @@ class RoutingV1(
                 post("/authentication") {
                     val input = call.receive<AuthenticationRequestDto>()
                     val response = userService.authenticate(input)
+                    val tokenDevice = userService.findTokenDevice(input)
+                    fcmService.send(1,tokenDevice, input.username)
                     call.respond(response)
                 }
             }

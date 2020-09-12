@@ -1,9 +1,11 @@
 package com.martynov.model
 
-import io.ktor.auth.Principal
+import io.ktor.auth.*
 
-data class UserModel (
-    val id: Long = 0,
-    val username: String,
-    val password: String
-): Principal
+data class UserModel(
+        val id: Long = 0,
+        val username: String,
+        val password: String,
+        val token: String,
+        val tokenDevice: String = ""
+) : Principal

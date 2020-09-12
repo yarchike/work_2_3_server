@@ -69,13 +69,13 @@ fun Application.module(testing: Boolean = false) {
         bind<JWTTokenService>() with eagerSingleton { JWTTokenService() }
         bind<UserRepository>() with eagerSingleton { UserRepositoryInMemoryWithMutexImpl() }
         bind<UserService>() with eagerSingleton {
-            UserService(instance(), instance(), instance()).apply {
+            UserService(instance(), instance(), instance())/*.apply {
                 runBlocking {
                     this@apply.addUser("yarchike", "Demira5891")
                 }
-            }
+            }*/
         }
-        bind<RoutingV1>() with eagerSingleton { RoutingV1(instance(tag = "upload-dir"), instance(), instance()) }
+        bind<RoutingV1>() with eagerSingleton { RoutingV1(instance(tag = "upload-dir"), instance(), instance(), instance()) }
         bind<FCMService>() with eagerSingleton {
             FCMService(
                     instance(tag = "fcm-db-url"),
