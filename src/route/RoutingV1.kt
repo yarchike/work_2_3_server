@@ -72,11 +72,16 @@ class RoutingV1(
                         call.respond(response)
                     }
                     post("/posts/{id}/likes") {
-                        val id =
-                                call.parameters["id"]?.toLongOrNull()
+                        val id = call.parameters["id"]?.toLongOrNull()
                                         ?: throw ParameterConversionException("id", "Long")
                         val me = call.authentication.principal<UserModel>()
                         val response = repo.likeById(id, me?.id) ?: throw NotFoundException()
+                        if (me != null) {
+                            if(response.autor != null){
+                                fcmService.send(id,userService.findTokenDeviceUser(response.autor), "Ващ пост лайкнул ${me.username}")
+                            }
+                        }
+                        print(response)
                         call.respond(response)
                     }
                     delete("/posts/{id}/likes") {
@@ -101,7 +106,8 @@ class RoutingV1(
                     post("/posts/new") {
                         val request = call.receive<PostResponseDto>()
                         print(request.toString())
-                        val response = repo.newPost(request.postResurse.toString(), request.attachment)
+                        val me = call.authentication.principal<UserModel>()
+                        val response = repo.newPost(request.postResurse.toString(), request.attachment, me?.username)
                                 ?: throw NotFoundException()
                         call.respond(response)
                     }
@@ -132,11 +138,11 @@ class RoutingV1(
                     }
                     post("/push") {
                         val input = call.receive<TokenDeviceDto>()
-                        //println(input.token)
+                        println(input.token)
                         val input2 = call.request.header("Authorization").toString().replace("Bearer ", "")
-                        //println(input2)
+                        println(input2)
                         val user = userService.addTokenDevice(input2, input.token)
-                        //println(user)
+                        println(user)
                         call.respond(user)
 
                     }
@@ -151,7 +157,7 @@ class RoutingV1(
                     val input = call.receive<AuthenticationRequestDto>()
                     val response = userService.authenticate(input)
                     val tokenDevice = userService.findTokenDevice(input)
-                    fcmService.send(1,tokenDevice, input.username)
+                    fcmService.send(-1,tokenDevice, "Добро пожаловать ${input.username}")
                     call.respond(response)
                 }
             }

@@ -109,7 +109,8 @@ class PostRepositoryMutex : PostRepository {
                 val newPost = post.copy(id = items.size.toLong(), type = PostTypes.Reposts)
 
                 items.add(newPost)
-
+                val fileName = "posts.json"
+                File(fileName).writeText(Gson().toJson(items))
                 newPost
             }
 
@@ -125,11 +126,13 @@ class PostRepositoryMutex : PostRepository {
                 }.reversed()
             }
 
-    override suspend fun newPost(postResurse: String, attachment: AttachmentModel?): List<PostModel> =
+    override suspend fun newPost(postResurse: String, attachment: AttachmentModel?,autorName: String?): List<PostModel> =
             mutex.withLock {
-                val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse, attachment = attachment)
+                val newPost = PostModel(id = items.size.toLong(), postResurse = postResurse, attachment = attachment,autor = autorName)
 
                 items.add(newPost)
+                val fileName = "posts.json"
+                File(fileName).writeText(Gson().toJson(items))
                 items
             }
 

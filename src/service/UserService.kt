@@ -66,6 +66,11 @@ class UserService(
         //print(tokenDevice)
         return tokenDevice
     }
+    fun findTokenDeviceUser(input: String):String{
+        val tokenDevice = repo.findTokenDevice(input)
+        //print(tokenDevice)
+        return tokenDevice
+    }
 
 
 }

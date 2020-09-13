@@ -9,10 +9,15 @@ object PostData {
 
     fun getDataBase(): ArrayList<PostModel> {
         val fileName = "posts.json"
+        try {
+            val type = object : TypeToken<List<PostModel>>() {}.type
+            val result: ArrayList<PostModel> = Gson().fromJson(File(fileName).readText(), type)
+            return result
+        }
+        catch (e:Exception){
+            return ArrayList<PostModel>()
+        }
 
-        val type = object : TypeToken<List<PostModel>>() {}.type
-        val result: ArrayList<PostModel> = Gson().fromJson(File(fileName).readText(), type)
 
-        return result
     }
 }

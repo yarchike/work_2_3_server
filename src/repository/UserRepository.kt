@@ -13,6 +13,6 @@ interface UserRepository {
     suspend fun addUser(item: UserModel): Boolean
     suspend fun addTokenDevice(tokenUser: String, tokenDevice: String): String
     fun  findTokenDevice(username: String):String
-
+    //fun  findTokenDeviceUser(username: String):String
 
 }
